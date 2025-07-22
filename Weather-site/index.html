@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Enhanced weather app with geolocation, unit conversion, and modern design using OpenWeatherMap API." />
+  <title>Enhanced Weather App Using OpenWeatherMap API</title>
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico" />
+  <link rel="stylesheet" href="styles/style.css" />
+  
+  <!-- Preload images for better performance -->
+  <link rel="prefetch" href="media/day1.jpg" />
+  <link rel="prefetch" href="media/cloudy1.jpg" />
+  <link rel="prefetch" href="media/rainy1.jpg" />
+  <link rel="prefetch" href="icons/loader.gif" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Background overlay for dynamic themes -->
+  <div class="background-overlay" id="backgroundOverlay"></div>
+
+  <!-- Enhanced Navigation Header -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">🌤️</span>
+      <span class="logo-text">Enhanced Weather</span>
+    </div>
+    
+    <nav class="nav-controls">
+      <div class="search-container">
+        <input 
+          type="text" 
+          class="search-input" 
+          id="citySearch"
+          placeholder="🔍 Search for a city..."
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <div class="search-suggestions" id="searchSuggestions"></div>
+      </div>
+      
+      <button class="control-btn location-btn" id="locationBtn" title="Get current location">
+        <span class="btn-icon">📍</span>
+        <span class="btn-text">My Location</span>
+      </button>
+      
+      <button class="control-btn unit-toggle" id="unitToggle" title="Toggle temperature units">
+        <span class="btn-text">°C</span>
+      </button>
+      
+      <button class="control-btn refresh-btn" id="refreshBtn" title="Refresh weather data">
+        <span class="btn-icon">🔄</span>
+      </button>
+      
+      <button class="control-btn theme-btn" id="themeToggle" title="Change theme">
+        <span class="btn-icon">🎨</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav">
+    <div class="mobile-search-container">
+      <input 
+        type="text" 
+        class="mobile-search-input" 
+        id="mobileSearch"
+        placeholder="Search city..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+    </div>
+    <div class="mobile-controls">
+      <button class="mobile-btn" id="mobileLocationBtn" title="Get location">📍</button>
+      <button class="mobile-btn" id="mobileUnitToggle" title="Toggle units">°C</button>
+      <button class="mobile-btn" id="mobileRefreshBtn" title="Refresh">🔄</button>
+      <button class="mobile-btn" id="mobileThemeToggle" title="Theme">🎨</button>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+    <!-- Loading/Error Messages -->
+    <div class="message-container" id="messageContainer"></div>
+    
+    <!-- Default Welcome Screen -->
+    <div class="welcome-screen" id="welcomeScreen">
+      <div class="welcome-content">
+        <h1 class="welcome-title">Enhanced Weather App</h1>
+        <p class="welcome-subtitle">Get real-time weather information for any city worldwide</p>
+        <div class="welcome-features">
+          <span class="feature-tag">📍 Geolocation</span>
+          <span class="feature-tag">🌡️ Unit Conversion</span>
+          <span class="feature-tag">📊 5-Day Forecast</span>
+          <span class="feature-tag">🎨 Dynamic Themes</span>
+        </div>
+        <button class="cta-button" onclick="document.getElementById('citySearch').focus()">
+          Search Your City
+        </button>
+      </div>
+    </div>
+
+    <!-- Current Weather Card -->
+    <div class="weather-card" id="currentWeatherCard" style="display: none;">
+      <!-- Location Info -->
+      <div class="location-header">
+        <h1 class="location-name" id="locationName">
+          <span class="city-name" id="cityName">---</span>
+          <span class="country-name" id="countryName"></span>
+        </h1>
+        <div class="location-details">
+          <span class="current-time" id="currentTime"></span>
+          <span class="coordinates" id="coordinates"></span>
+        </div>
+      </div>
+
+      <!-- Current Weather Display -->
+      <div class="current-weather-section">
+        <div class="weather-icon-container">
+          <div class="weather-icon" id="currentWeatherIcon">🌤️</div>
+          <div class="weather-condition" id="weatherCondition">Clear Sky</div>
+        </div>
+        
+        <div class="temperature-section">
+          <div class="main-temperature" id="mainTemperature" title="Click to toggle units">--°</div>
+          <div class="temperature-range">
+            <span class="temp-label">H:</span>
+            <span class="high-temp" id="highTemp">--°</span>
+            <span class="temp-label">L:</span>
+            <span class="low-temp" id="lowTemp">--°</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Details Grid -->
+      <div class="weather-details-grid">
+        <div class="detail-card">
+          <div class="detail-icon">🌡️</div>
+          <div class="detail-content">
+            <div class="detail-label">Feels like</div>
+            <div class="detail-value" id="feelsLike">--°</div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-icon">💧</div>
+          <div class="detail-content">
+            <div class="detail-label">Humidity</div>
+            <div class="detail-value" id="humidity">--%</div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-icon">💨</div>
+          <div class="detail-content">
+            <div class="detail-label">Wind Speed</div>
+            <div class="detail-value" id="windSpeed">-- km/h</div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-icon">🧭</div>
+          <div class="detail-content">
+            <div class="detail-label">Wind Direction</div>
+            <div class="detail-value" id="windDirection">--°</div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-icon">👁️</div>
+          <div class="detail-content">
+            <div class="detail-label">Visibility</div>
+            <div class="detail-value" id="visibility">-- km</div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-icon">📊</div>
+          <div class="detail-content">
+            <div class="detail-label">Pressure</div>
+            <div class="detail-value" id="pressure">-- hPa</div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-icon">🌅</div>
+          <div class="detail-content">
+            <div class="detail-label">Sunrise</div>
+            <div class="detail-value" id="sunrise">--:--</div>
+          </div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-icon">🌇</div>
+          <div class="detail-content">
+            <div class="detail-label">Sunset</div>
+            <div class="detail-value" id="sunset">--:--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5-Day Forecast Section -->
+    <div class="forecast-section" id="forecastSection" style="display: none;">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="section-icon">📅</span>
+          5-Day Forecast
+        </h2>
+      </div>
+      
+      <div class="forecast-container" id="forecastContainer">
+        <!-- Forecast cards will be dynamically inserted here -->
+      </div>
+    </div>
+
+    <!-- Hourly Forecast Section -->
+    <div class="hourly-section" id="hourlySection" style="display: none;">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="section-icon">🕐</span>
+          24-Hour Forecast
+        </h2>
+      </div>
+      
+      <div class="hourly-container" id="hourlyContainer">
+        <!-- Hourly cards will be dynamically inserted here -->
+      </div>
+    </div>
+
+    <!-- Additional Weather Info -->
+    <div class="additional-info" id="additionalInfo" style="display: none;">
+      <div class="info-card air-quality-card">
+        <div class="info-header">
+          <span class="info-icon">🌬️</span>
+          <span class="info-title">Air Quality</span>
+        </div>
+        <div class="air-quality-value" id="airQuality">Good</div>
+        <div class="air-quality-desc" id="airQualityDesc">Air quality is satisfactory</div>
+      </div>
+      
+      <div class="info-card uv-card">
+        <div class="info-header">
+          <span class="info-icon">☀️</span>
+          <span class="info-title">UV Index</span>
+        </div>
+        <div class="uv-value" id="uvIndex">5</div>
+        <div class="uv-desc" id="uvDesc">Moderate</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Floating Action Button for Quick Actions -->
+  <div class="fab-container">
+    <button class="fab-main" id="fabMain">⚡</button>
+    <div class="fab-options" id="fabOptions">
+      <button class="fab-option" id="fabFavorite" title="Add to favorites">⭐</button>
+      <button class="fab-option" id="fabShare" title="Share weather">📤</button>
+      <button class="fab-option" id="fabSettings" title="Settings">⚙️</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2023 Enhanced Weather App. Powered by OpenWeatherMap API.</p>
+      <div class="footer-links">
+        <a href="#" class="footer-link">Privacy</a>
+        <a href="#" class="footer-link">Terms</a>
+        <a href="#" class="footer-link">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="scripts/script.js"></script>
+</body>
+</html>
